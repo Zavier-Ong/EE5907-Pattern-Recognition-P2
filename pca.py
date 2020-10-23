@@ -1,4 +1,5 @@
 import os
+import random
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -8,5 +9,4 @@ import plotly
 import plotly.graph_objs as go
 from tqdm import tqdm
 
-print("hello world")
-
+dirpath = os.path.join(os.getcwd(), 'PIE')
