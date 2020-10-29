@@ -4,10 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import axes3d
-import scipy.spatial.distance as dist
 import plotly
 import plotly.graph_objs as go
 from tqdm import tqdm
+from sklearn.decomposition import PCA
 
 folders = ['1', '4', '7', '8', '9', '10', '16', '17', '21', '22',
            '23', '28', '31', '34', '36', '43', '46', '48', '53', '57',
@@ -72,3 +72,15 @@ print('Vectorized Training set: {}     Vectorized Test set: {}'.format(train_x.s
 
 #sampling 500
 samples = random.sample(range(train_x.shape[0]), 500)
+sampled_x = train_x[samples]
+sampled_y = train_y[samples]
+
+pca = PCA(n_components=2)
+pca.fit(sampled_x)
+#reduce dimensionality
+x_reduced = pca.transform(sampled_x)
+
+#2D plot
+plt.figure(figsize = (7, 5))
+plt.scatter(x_reduced[0, samples], x_reduced[1, samples], marker = '.', alpha=1)
+
