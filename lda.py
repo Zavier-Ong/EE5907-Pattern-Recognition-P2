@@ -4,9 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from tqdm import tqdm
-from sklearn.decomposition import PCA
-from sklearn.neighbors import KNeighborsClassifier as KNN
-from sklearn.metrics import accuracy_score
+from sklearn.discriminant_analysis import  LinearDiscriminantAnalysis as LDA
+
 
 folders = ['1', '4', '7', '8', '10', '13', '16', '17', '21', '22',
            '23', '28', '31', '34', '36', '43', '45', '48', '53', '55',
@@ -22,7 +21,7 @@ pie_test_labels = []
 pie_test_imgs = []
 
 #random to ensure reproducibility
-random.seed(6)
+random.seed(2)
 
 for folder in tqdm(folders):
     img_folder = os.path.join('PIE', folder)
@@ -86,11 +85,11 @@ print('Vectorized Training set: {}     Vectorized Test set: {}'.format(train_x.s
 samples = random.sample(range(train_x.shape[0]), 500)
 sampled_x = train_x[samples]
 sampled_y = train_y[samples]
-#2D PCA
-pca = PCA(n_components=2)
-pca.fit(sampled_x)
-#reduce dimensionality
-x_reduced2D = pca.transform(sampled_x)
+
+#2D
+lda = LDA(n_components=2)
+lda.fit(sampled_x, sampled_y)
+x_projected2D = lda.transform(sampled_x)
 
 #setting up colors for different folders
 folder_color = np.linspace(0,1,25)
@@ -104,19 +103,15 @@ box = ax.get_position()
 ax.set_position([box.x0, box.y0, box.width*0.75, box.height])
 #plotting photos
 for i, label in enumerate(folders):
-    plt.scatter(x_reduced2D[sampled_y == int(label)][:, 0], x_reduced2D[sampled_y == int(label)][:, 1], label=label)
-
+    plt.scatter(x_projected2D[sampled_y == int(label)][:, 0], x_projected2D[sampled_y == int(label)][:, 1], label=label)
 #plotting own photos
-plt.plot(x_reduced2D[sampled_y == 26][:, 0], x_reduced2D[sampled_y == 26][:, 1], 'k*', markersize=20)
+plt.plot(x_projected2D[sampled_y == 26][:, 0], x_projected2D[sampled_y == 26][:, 1], 'k*', markersize=20)
 plt.legend(ncol=2, bbox_to_anchor=(1.03,1), loc='upper left')
-#plt.show()
 
-#3D PCA
-pca = PCA(n_components=3)
-pca.fit(sampled_x)
-#reduce dimensionality
-x_reduced3D = pca.transform(sampled_x)
-
+#3D
+lda = LDA(n_components=3)
+lda.fit(sampled_x, sampled_y)
+x_projected3D = lda.transform(sampled_x)
 #3D plot
 fig2 = plt.figure()
 ax = fig2.add_subplot(111, projection='3d')
@@ -124,61 +119,11 @@ box = ax.get_position()
 ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
 #plotting photos
 for i, label in enumerate(folders):
-    ax.scatter(x_reduced3D[sampled_y == int(label)][:,0],
-                x_reduced3D[sampled_y == int(label)][:,1],
-                x_reduced3D[sampled_y == int(label)][:,2],
+    ax.scatter(x_projected3D[sampled_y == int(label)][:,0],
+                x_projected3D[sampled_y == int(label)][:,1],
+                x_projected3D[sampled_y == int(label)][:,2],
                 label=label)
 #plotting own photos
-plt.plot(x_reduced3D[sampled_y==26][:,0], x_reduced3D[sampled_y==26][:,1], x_reduced3D[sampled_y==26][:,2], 'k*', markersize=20)
+plt.plot(x_projected3D[sampled_y==26][:,0], x_projected3D[sampled_y==26][:,1], x_projected3D[sampled_y==26][:,2], 'k*', markersize=20)
 plt.legend(ncol=2, bbox_to_anchor=(1.03,-0.3), loc='lower left')
-
-#3 eigenfaces
-fig3 = plt.figure()
-eigenfaces = pca.components_.reshape(3, 32, 32)
-
-for i in range(3):
-    ax = fig3.add_subplot(1,3,i+1)
-    ax.imshow(eigenfaces[i,:,:])
-    ax.set
-
-
-#vectorize CMU PIE test and selfie sets
-test_pie_x = np.array(pie_test_imgs)
-test_pie_y = np.array(pie_test_labels)
-test_own_x = np.array(own_test_imgs)
-test_own_y = np.array(own_test_labels)
-#vectorize CMU PIE and selfie test images
-test_pie_x = test_pie_x.reshape(len(pie_test_imgs), -1)
-test_own_x = test_own_x.reshape(len(own_test_imgs), -1)
-
-def doPCA(dimensions, isOwn):
-    knn = KNN()
-    n_pca = PCA(n_components=dimensions)
-    if isOwn:
-        n_pca.fit(train_x)
-        train_x_reduced = n_pca.transform(train_x)
-        knn.fit(train_x_reduced, train_y)
-        test_x_reduced = n_pca.transform(test_own_x)
-        result = knn.predict(test_x_reduced)
-        print('Accuracy for PCA {} on own selfie test: {}'.format(dimensions, accuracy_score(test_own_y, result)))
-    else:
-        n_pca.fit(train_x)
-        train_x_reduced = n_pca.transform(train_x)
-        knn.fit(train_x_reduced, train_y)
-        test_x_reduced = n_pca.transform(test_pie_x)
-        result = knn.predict(test_x_reduced)
-        print('Accuracy for PCA {} on CMU PIE test: {}'.format(dimensions, accuracy_score(test_pie_y, result)))
-
-#PCA 40
-doPCA(40, True)
-doPCA(40, False)
-#PCA 80
-doPCA(80, True)
-doPCA(80, False)
-#PCA 200
-doPCA(200, True)
-doPCA(200, False)
-
-#show 2D, 3D and 3 eigen faces figures
 plt.show()
-
