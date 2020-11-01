@@ -2,9 +2,11 @@ import os
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 from tqdm import tqdm
+from matplotlib import cm
 from sklearn.discriminant_analysis import  LinearDiscriminantAnalysis as LDA
+from sklearn.neighbors import KNeighborsClassifier as KNN
+from sklearn.metrics import accuracy_score
 
 
 folders = ['1', '4', '7', '8', '10', '13', '16', '17', '21', '22',
@@ -126,4 +128,42 @@ for i, label in enumerate(folders):
 #plotting own photos
 plt.plot(x_projected3D[sampled_y==26][:,0], x_projected3D[sampled_y==26][:,1], x_projected3D[sampled_y==26][:,2], 'k*', markersize=20)
 plt.legend(ncol=2, bbox_to_anchor=(1.03,-0.3), loc='lower left')
+
+#vectorize CMU PIE test and selfie sets
+test_pie_x = np.array(pie_test_imgs)
+test_pie_y = np.array(pie_test_labels)
+test_own_x = np.array(own_test_imgs)
+test_own_y = np.array(own_test_labels)
+#vectorize CMU PIE and selfie test images
+test_pie_x = test_pie_x.reshape(len(pie_test_imgs), -1)
+test_own_x = test_own_x.reshape(len(own_test_imgs), -1)
+
+def doLDA(dimensions, isOwn):
+    knn = KNN()
+    n_lda = LDA(n_components=dimensions)
+    if isOwn:
+        n_lda.fit(train_x, train_y)
+        train_x_reduced = n_lda.transform(train_x)
+        knn.fit(train_x_reduced, train_y)
+        test_x_reduced = n_lda.transform(test_own_x)
+        result = knn.predict(test_x_reduced)
+        print('Accuracy for LDA {} on own selfie test: {}'.format(dimensions, accuracy_score(test_own_y, result)))
+    else:
+        n_lda.fit(train_x, train_y)
+        train_x_reduced = n_lda.transform(train_x)
+        knn.fit(train_x_reduced, train_y)
+        test_x_reduced = n_lda.transform(test_pie_x)
+        result = knn.predict(test_x_reduced)
+        print('Accuracy for LDA {} on CMU PIE test: {}'.format(dimensions, accuracy_score(test_pie_y, result)))
+
+#LDA 2
+doLDA(2, True)
+doLDA(2, False)
+#LDA 3
+doLDA(3, True)
+doLDA(3, False)
+#LDA 9
+doLDA(9, True)
+doLDA(9, False)
+
 plt.show()

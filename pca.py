@@ -2,8 +2,8 @@ import os
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 from tqdm import tqdm
+from matplotlib import cm
 from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier as KNN
 from sklearn.metrics import accuracy_score
@@ -109,7 +109,6 @@ for i, label in enumerate(folders):
 #plotting own photos
 plt.plot(x_reduced2D[sampled_y == 26][:, 0], x_reduced2D[sampled_y == 26][:, 1], 'k*', markersize=20)
 plt.legend(ncol=2, bbox_to_anchor=(1.03,1), loc='upper left')
-#plt.show()
 
 #3D PCA
 pca = PCA(n_components=3)
