@@ -80,10 +80,15 @@ train_x = train_x/255
 test_x = test_x/255
 
 def doSVM(dimensions, kernel):
-    n_pca = PCA(n_components=dimensions)
-    n_pca.fit(train_x)
-    train_x_reduced = n_pca.transform(train_x)
-    test_x_reduced = n_pca.transform(test_x)
+    #raw vectorized face images
+    if dimensions==0:
+        train_x_reduced = train_x
+        test_x_reduced = test_x
+    else:
+        n_pca = PCA(n_components=dimensions)
+        n_pca.fit(train_x)
+        train_x_reduced = n_pca.transform(train_x)
+        test_x_reduced = n_pca.transform(test_x)
     penaltyParameters = [0.01, 0.1, 1]
     result = []
     for penalty in penaltyParameters:
@@ -92,17 +97,21 @@ def doSVM(dimensions, kernel):
         predictions = svm.predict(test_x_reduced)
         score = accuracy_score(test_y, predictions)
         result.append(score)
-        print('Accuracy for {} SVM with penality({}) at {} dimensions: {}'.format(kernel, penalty, dimensions, score))
+        if dimensions==0:
+            print('Accuracy for {} SVM with penalty({}) for raw images: {}'.format(kernel, penalty, score))
+        else:
+            print('Accuracy for {} SVM with penalty({}) at {} dimensions: {}'.format(kernel, penalty, dimensions, score))
     return result
 
-def plotResult(name, result80, result200, plotIndex):
+def plotResult(name, resultraw, result80, result200, plotIndex):
     labels = [0.01, 0.1, 1]
     x = np.arange(len(labels))
     width = 0.35
 
     plt.subplot(2, 2, plotIndex)
-    plt.bar(x-width/2, result80, width, label='80')
-    plt.bar(x+width/2, result200, width, label='200')
+    plt.bar(x-width/2, result80, width/3, label='80')
+    plt.bar(x, result200, width/3, label='200')
+    plt.bar(x+width/2, resultraw, width/3, label='raw')
     plt.title(name)
     plt.xlabel('C')
     plt.xticks(x, labels)
@@ -113,9 +122,10 @@ kernels = ['linear', 'rbf', 'poly', 'sigmoid']
 index = 1
 fig = plt.figure()
 for kernel in kernels:
+    result_raw = doSVM(0, kernel)
     result_80 = doSVM(80, kernel)
     result_200 = doSVM(200, kernel)
-    plotResult(kernel, result_80, result_200, index)
+    plotResult(kernel, result_raw, result_80, result_200, index)
     index = index+1
 
 fig.tight_layout()
