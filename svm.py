@@ -2,10 +2,10 @@ import os
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 from sklearn.svm import SVC
 from sklearn.decomposition import PCA
 from sklearn.metrics import accuracy_score
+from tqdm import tqdm
 
 folders = ['1', '4', '7', '8', '10', '13', '16', '17', '21', '22',
            '23', '28', '31', '34', '36', '43', '45', '48', '53', '55',
