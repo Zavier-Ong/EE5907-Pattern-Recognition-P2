@@ -90,7 +90,7 @@ def doGMM(pca_dimensions):
         train_x_reduced = n_pca.transform(train_x)
         test_x_reduced = n_pca.transform(test_x)
     gmm = GMM(n_components=3, covariance_type='full')
-    gmm.fit(train_x_reduced, test_y)
+    gmm.fit(train_x_reduced)
     predictions = gmm.predict(test_x_reduced)
     #plotting
     plt.figure()

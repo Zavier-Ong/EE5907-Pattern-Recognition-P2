@@ -79,7 +79,7 @@ print('Vectorized Training set: {}     Vectorized Test set: {}'.format(train_x.s
 train_x = train_x/255
 test_x = test_x/255
 
-def doSVM(dimensions, kernel):
+def doSVM(dimensions):
     #raw vectorized face images
     if dimensions==0:
         train_x_reduced = train_x
@@ -92,41 +92,38 @@ def doSVM(dimensions, kernel):
     penaltyParameters = [0.01, 0.1, 1]
     result = []
     for penalty in penaltyParameters:
-        svm = SVC(C=penalty, kernel=kernel)
+        svm = SVC(C=penalty, kernel='linear')
         svm.fit(train_x_reduced, train_y)
         predictions = svm.predict(test_x_reduced)
         score = accuracy_score(test_y, predictions)
         result.append(score)
         if dimensions==0:
-            print('Accuracy for {} SVM with penalty({}) for raw images: {}'.format(kernel, penalty, score))
+            print('Accuracy for linear SVM with penalty({}) for raw images: {}'.format(penalty, score))
         else:
-            print('Accuracy for {} SVM with penalty({}) at {} dimensions: {}'.format(kernel, penalty, dimensions, score))
+            print('Accuracy for linear SVM with penalty({}) at {} dimensions: {}'.format(penalty, dimensions, score))
     return result
 
-def plotResult(name, resultraw, result80, result200, plotIndex):
+def plotResult(resultraw, result80, result200):
     labels = [0.01, 0.1, 1]
     x = np.arange(len(labels))
     width = 0.35
 
-    plt.subplot(2, 2, plotIndex)
+    plt.subplot(1, 1, 1)
     plt.bar(x-width/2, result80, width/3, label='80')
     plt.bar(x, result200, width/3, label='200')
     plt.bar(x+width/2, resultraw, width/3, label='raw')
-    plt.title(name)
+    plt.title('Linear')
     plt.xlabel('C')
     plt.xticks(x, labels)
     plt.ylabel('Accuracy')
     plt.legend()
 
-kernels = ['linear', 'rbf', 'poly', 'sigmoid']
-index = 1
+
 fig = plt.figure()
-for kernel in kernels:
-    result_raw = doSVM(0, kernel)
-    result_80 = doSVM(80, kernel)
-    result_200 = doSVM(200, kernel)
-    plotResult(kernel, result_raw, result_80, result_200, index)
-    index = index+1
+result_raw = doSVM(0)
+result_80 = doSVM(80)
+result_200 = doSVM(200)
+plotResult(result_raw, result_80, result_200)
 
 fig.tight_layout()
 plt.show()
